@@ -28,14 +28,18 @@
 			var velocity = 0;
 			var velocityH = 0;
             var heading = 0;
-            var barrelHeading=0;
+			var barrelHeading=0;
+			var elevationAngle=0;
 			var lastTime;
             var TankWheelRightFront;
             var TankWheelLeftFront;
             var TankBarrel;                
             var Tank;
-            var Shell=[];
-            var shellVelocity=0;
+            var Shell;
+			var shellVelocity=0;
+			var shellUpwardVelocity=0;
+			var shellForwardVelocity=0;
+					
             var ShellCount=0;
             var Fire=false;
 
@@ -43,8 +47,12 @@
 			var guiMe = function() {
 			  this.Heading = heading;
 			  this.Velocity = velocity;
+			  this.BarrelHeading=barrelHeading;
+			  this.ElevationAngle=elevationAngle;
+
 			  this.addSpeed = 10;
 			  this.rotSpeed = 2;
+			  this.rotBarrelSpeed=2;
 			  this.Stop = function() {
 			   	velocity = 0;
 			  	this.Velocity = velocity;
@@ -142,8 +150,8 @@
 //這邊目前把tank barre從group拿掉，因為不拿掉的話，會相當難以計算
 //Barrel的角度
 //----------------------------------------------------
-                Tank.add(TankBarrel);
-                // scene.add(TankBarrel);
+                // Tank.add(TankBarrel);
+                scene.add(TankBarrel);
                 scene.add(Tank);
 
                 
@@ -175,8 +183,11 @@
 
 				gui.add(params, 'Heading').listen();
 				gui.add(params, 'Velocity').listen();
+				gui.add(params,"BarrelHeading").listen();
+				gui.add(params,"ElevationAngle").listen();
 				gui.add(params, 'addSpeed', 0, 30);
 				gui.add(params, 'rotSpeed', 0, 30);
+				gui.add(params, "rotBarrelSpeed",0,30);
 				gui.add(params, 'Stop');
 				gui.add(params, 'FollowMe');
 				gui.open();
@@ -186,36 +197,43 @@
 			        var q = new THREE.Quaternion();
 			        switch( key ) {
 			          case 'w': case 'W':
-                        TankBarrel.rotation.x-=0.1;
+					  elevationAngle+=params.rotBarrelSpeed;
+						elevationAngle = elevationAngle % 360;
+						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), -params.rotBarrelSpeed * Math.PI / 180);       	
 							break;
 			          case 's': case 'S':
-                          TankBarrel.rotation.x+=0.1;
+					  elevationAngle-=params.rotBarrelSpeed;
+						  elevationAngle = elevationAngle % 360;
+						  TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       	
                         break;
                      case 'd': case 'D':
-                      TankBarrel.rotation.y-=0.1;            
-                      barrelHeading	-= 0.1;
-                      barrelHeading = barrelHeading % 360;			     
-							// Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);            
+
+                      barrelHeading	-= params.rotBarrelSpeed;
+					  barrelHeading = barrelHeading % 360;
+					  TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180);  
+	     
                         break;
                     case 'a': case 'A':
-                          TankBarrel.rotation.y+=0.1;                        
-                        break;
+              
+						  barrelHeading	+= params.rotBarrelSpeed;
+							 barrelHeading = barrelHeading % 360;
+							 TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       			     
+						  break;
 			          case ' ':
                             geometry=new THREE.SphereGeometry(5,32,32);
                             material=new THREE.MeshPhongMaterial({color:"#ffffff"});
                             Shell=new THREE.Mesh(geometry,material);
                             
-                            Shell.position.x=Tank.children[3].getWorldPosition().x;
-                            Shell.position.y=Tank.children[3].getWorldPosition().y;
-                            Shell.position.z=Tank.children[3].getWorldPosition().z;
-
-                            // console.log(Tank.children[3].getWorldPosition());
-                            // Shell.position.y=TankBarrel.position.y;
-                            // Shell.position.z=TankBarrel.position.z;                            
+                            Shell.position.x=TankBarrel.getWorldPosition().x;
+                            Shell.position.y=TankBarrel.getWorldPosition().y;
+                            Shell.position.z=TankBarrel.getWorldPosition().z;
+                      
                             scene.add(Shell);
                             shellVelocity=20;
-                            Fire=true;
-                            ShellCount++
+							Fire=true;
+							shellForwardVelocity= shellVelocity * Math.cos(elevationAngle * Math.PI / 180);
+							shellUpwardVelocity  =shellVelocity * Math.sin(elevationAngle * Math.PI / 180);
+							velocityH=shellUpwardVelocity;
                         // velocityH = 50;
                             break;
                       case "8":
@@ -268,15 +286,25 @@
 				var OldPositionZ = Tank.position.z;
 				Tank.position.x += tickV * Math.sin(heading * Math.PI / 180);
 				Tank.position.z += tickV * Math.cos(heading * Math.PI / 180);
+				var OldBarrelPositionX=TankBarrel.position.x;
+				var OldBarrelPositionZ=TankBarrel.position.z;
+				TankBarrel.position.x += tickV * Math.sin(heading * Math.PI / 180);
+				TankBarrel.position.z += tickV * Math.cos(heading * Math.PI / 180);
 				if(Tank.position.x > 450 || Tank.position.x < -450)
+				{
 					Tank.position.x = OldPositionX;
-				else
-					BBhead.position.x = Tank.position.x;
+					TankBarrel.position.x=OldBarrelPositionX;
+				}
+				// else
+				// 	BBhead.position.x = Tank.position.x;
 
 				if(Tank.position.z > 450 || Tank.position.z < -450)
-					Tank.position.z = OldPositionZ;
-				else
-					BBhead.position.z = Tank.position.z;
+				{
+						Tank.position.z = OldPositionZ;
+						TankBarrel.position.z=OldBarrelPositionZ;
+				}
+				// else
+				// 	BBhead.position.z = Tank.position.z;
 
 
 				// BBhead.position.y = Tank.position.y + 50;
@@ -290,8 +318,14 @@
                 }
                 if(Fire==true)
                 {
-                    Shell.position.x += shellVelocity * Math.sin(heading * Math.PI / 180);
-                    Shell.position.z += shellVelocity * Math.cos(heading * Math.PI / 180);
+
+					
+                    Shell.position.x += shellForwardVelocity * Math.sin(barrelHeading * Math.PI / 180);
+					Shell.position.z += shellForwardVelocity * Math.cos(barrelHeading * Math.PI / 180);
+
+
+
+					console.log(elevationAngle);
                     // Shell.position.
                     velocityH += 10*gravity*deltaTime/1000.0;
 
@@ -307,7 +341,8 @@
 
 				params.Velocity = velocity;
 				params.Heading = heading;
-
+				params.BarrelHeading=barrelHeading;
+				params.ElevationAngle=elevationAngle;
 				renderer.render( scene, camera );
 				// have the mouse update the view
 				controls.update();
