@@ -150,17 +150,17 @@
 //這邊目前把tank barre從group拿掉，因為不拿掉的話，會相當難以計算
 //Barrel的角度
 //----------------------------------------------------
-                // Tank.add(TankBarrel);
-                scene.add(TankBarrel);
+                Tank.add(TankBarrel);
+                // scene.add(TankBarrel);
                 scene.add(Tank);
 
                 
-				texture = new THREE.TextureLoader().load( 'textures/BB8-Head.jpg' );
-				geometry = new THREE.SphereGeometry( 25, 32, 16 );
-				material = new THREE.MeshPhongMaterial( { map: texture } );
-				BBhead = new THREE.Mesh( geometry, material );
-				BBhead.rotation.y = -90 * Math.PI / 180;
-				BBhead.position.y = 100.01;
+				// texture = new THREE.TextureLoader().load( 'textures/BB8-Head.jpg' );
+				// geometry = new THREE.SphereGeometry( 25, 32, 16 );
+				// material = new THREE.MeshPhongMaterial( { map: texture } );
+				// BBhead = new THREE.Mesh( geometry, material );
+				// BBhead.rotation.y = -90 * Math.PI / 180;
+				// BBhead.position.y = 100.01;
 				// scene.add( BBhead );
 
 				renderer = new THREE.WebGLRenderer();
@@ -193,31 +193,34 @@
 				gui.open();
 
 				window.onkeypress = function( event ) {
-			        var key = String.fromCharCode(event.keyCode);
+					var key = String.fromCharCode(event.keyCode);
 			        var q = new THREE.Quaternion();
 			        switch( key ) {
 			          case 'w': case 'W':
-					  elevationAngle+=params.rotBarrelSpeed;
+					  	elevationAngle+=params.rotBarrelSpeed;
 						elevationAngle = elevationAngle % 360;
 						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), -params.rotBarrelSpeed * Math.PI / 180);       	
-							break;
+						
+						break;
 			          case 's': case 'S':
-					  elevationAngle-=params.rotBarrelSpeed;
-						  elevationAngle = elevationAngle % 360;
-						  TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       	
+					  	elevationAngle-=params.rotBarrelSpeed;
+						elevationAngle = elevationAngle % 360;
+						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       	
                         break;
                      case 'd': case 'D':
-
-                      barrelHeading	-= params.rotBarrelSpeed;
-					  barrelHeading = barrelHeading % 360;
-					  TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180);  
+	                      barrelHeading	-= params.rotBarrelSpeed;
+						  barrelHeading = barrelHeading % 360;
+					//   TankBarrel.rotateAroundWorldAxis(Tank.position,new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180)			     
+	
+						  TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180);  
 	     
                         break;
                     case 'a': case 'A':
-              
-						  barrelHeading	+= params.rotBarrelSpeed;
-							 barrelHeading = barrelHeading % 360;
-							 TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       			     
+			  
+						barrelHeading	+= params.rotBarrelSpeed;
+						barrelHeading = barrelHeading % 360;
+						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       
+							//  TankBarrel.rotateAroundWorldAxis(Tank.position,new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180)			     
 						  break;
 			          case ' ':
                             geometry=new THREE.SphereGeometry(5,32,32);
@@ -238,26 +241,34 @@
                             break;
                       case "8":
                             velocity += params.addSpeed;
-                            params.Velocity = velocity;
+							params.Velocity = velocity;
+							Tank.position.x += 2 * Math.sin(heading * Math.PI / 180);
+							Tank.position.z += 2 * Math.cos(heading * Math.PI / 180);
                             TankWheelRightFront.rotation.x+=0.3;
 							TankWheelLeftFront.rotation.x+=0.3;
                       break;      
-                      case "5":
+					  case "5":
+							Tank.position.x += 2 * Math.sin(heading * Math.PI / 180);
+							Tank.position.z += 2 * Math.cos(heading * Math.PI / 180);
                             velocity -= params.addSpeed;
                             params.Velocity = velocity;
                             TankWheelRightFront.rotation.x-=0.3;
 							TankWheelLeftFront.rotation.x-=0.3;
                       break;
                       case "6":
-                            heading	-= params.rotSpeed;
+							heading	-= params.rotSpeed;
 			          		heading = heading % 360;			     
+							barrelHeading-=params.rotSpeed;
+							barrelHeading=barrelHeading%360;
 							Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);
                             TankWheelRightFront.rotation.x-=0.3;
                             TankWheelLeftFront.rotation.x+=0.3;
                       break;
                       case "4":
                             heading	+= params.rotSpeed;
-			          		heading = heading % 360;
+							heading = heading % 360;
+							barrelHeading+=params.rotSpeed;
+							barrelHeading=barrelHeading%360;
 							Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), params.rotSpeed * Math.PI / 180);
                             TankWheelRightFront.rotation.x+=0.3;
 							TankWheelLeftFront.rotation.x-=0.3;                      
@@ -284,12 +295,12 @@
 				// Move the body & head
 				var OldPositionX = Tank.position.x;
 				var OldPositionZ = Tank.position.z;
-				Tank.position.x += tickV * Math.sin(heading * Math.PI / 180);
-				Tank.position.z += tickV * Math.cos(heading * Math.PI / 180);
+				// Tank.position.x += tickV * Math.sin(heading * Math.PI / 180);
+				// Tank.position.z += tickV * Math.cos(heading * Math.PI / 180);
 				var OldBarrelPositionX=TankBarrel.position.x;
 				var OldBarrelPositionZ=TankBarrel.position.z;
-				TankBarrel.position.x += tickV * Math.sin(heading * Math.PI / 180);
-				TankBarrel.position.z += tickV * Math.cos(heading * Math.PI / 180);
+				// TankBarrel.position.x += tickV * Math.sin(heading * Math.PI / 180);
+				// TankBarrel.position.z += tickV * Math.cos(heading * Math.PI / 180);
 				if(Tank.position.x > 450 || Tank.position.x < -450)
 				{
 					Tank.position.x = OldPositionX;
@@ -331,7 +342,7 @@
 
                     Shell.position.y += 10*velocityH*deltaTime/1000.0;
                     if(Shell.position.y < 5){
-                        // Shell.position.y = 0;
+
                         scene.remove(Shell);
                         velocityH = 0;
                     }
