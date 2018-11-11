@@ -261,37 +261,8 @@
 						TankWheelLeftFront.rotation.x+=0.3;
 						TankWheelRightBack.rotation.x+=0.3;
 						TankWheelLeftBack.rotation.x+=0.3;
-						// camera.lookAt(Tank.position);
-					// camera.position.x = camera.position.x;
-					// camera.position.y = camera.position.;
-					// camera.position.z = camera.position.z;
 
-					}
-					//left
-					if(e.keyCode==37)
-					{
-						heading	+= params.rotSpeed;
-						heading = heading % 360;
-						barrelHeading+=params.rotSpeed;
-						barrelHeading=barrelHeading%360;
-						Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), params.rotSpeed * Math.PI / 180);
-						TankWheelRightFront.rotation.x+=0.3;
-						TankWheelRightBack.rotation.x+=0.3;						
-						TankWheelLeftFront.rotation.x-=0.3;                      
-						TankWheelLeftBack.rotation.x-=0.3;  
-					}
-					//right
-					if(e.keyCode==39)
-					{
-						heading	-= params.rotSpeed;
-						heading = heading % 360;			     
-						barrelHeading-=params.rotSpeed;
-						barrelHeading=barrelHeading%360;
-						Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);
-						TankWheelRightFront.rotation.x-=0.3;
-						TankWheelRightBack.rotation.x-=0.3;
-						TankWheelLeftFront.rotation.x+=0.3;
-						TankWheelLeftBack.rotation.x+=0.3;
+
 					}
 					//down
 					if(e.keyCode==40)
@@ -310,6 +281,37 @@
 						TankWheelLeftBack.rotation.x-=0.3;
 
 					}
+				});
+				window.addEventListener('keydown', function (e) {
+					//left
+					if(e.keyCode==37)
+					{
+						heading	+= params.rotSpeed;
+						heading = heading % 360;
+						barrelHeading+=params.rotSpeed;
+						barrelHeading=barrelHeading%360;
+						Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), params.rotSpeed * Math.PI / 180);
+						TankWheelRightFront.rotation.x+=0.3;
+						TankWheelRightBack.rotation.x+=0.3;						
+						TankWheelLeftFront.rotation.x-=0.3;                      
+						TankWheelLeftBack.rotation.x-=0.3;  
+					}
+
+					//right
+					if(e.keyCode==39)
+					{
+						heading	-= params.rotSpeed;
+						heading = heading % 360;			     
+						barrelHeading-=params.rotSpeed;
+						barrelHeading=barrelHeading%360;
+						Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);
+						TankWheelRightFront.rotation.x-=0.3;
+						TankWheelRightBack.rotation.x-=0.3;
+						TankWheelLeftFront.rotation.x+=0.3;
+						TankWheelLeftBack.rotation.x+=0.3;
+					}
+				});
+				window.addEventListener('keydown', function (e) {
 					if(e.keyCode==87)
 					{
 						if(elevationAngle+params.rotBarrelSpeed<32)
@@ -318,7 +320,7 @@
 							elevationAngle = elevationAngle % 360;
 							TankBarrel.rotation.x-=params.rotBarrelSpeed * Math.PI / 180;
 						}
-						// TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), -params.rotBarrelSpeed * Math.PI / 180);       	
+	
 						console.log(elevationAngle);
 						// break;
 					}
@@ -332,6 +334,8 @@
 						}
 						console.log(elevationAngle);
 					}
+				});
+				window.addEventListener('keydown', function (e) {
 					if(e.keyCode==65)
 					{
 						barrelHeading	+= params.rotBarrelSpeed;
@@ -344,6 +348,8 @@
 						barrelHeading = barrelHeading % 360;
 						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180);  
 					}
+				});
+				window.addEventListener('keydown', function (e) {
 					if(e.keyCode==32)
 					{
 						geometry=new THREE.SphereGeometry(5,32,32);
@@ -361,12 +367,12 @@
 						shellUpwardVelocity  =shellVelocity * Math.sin(elevationAngle * Math.PI / 180);
 						velocityH=shellUpwardVelocity;
 					}
-
-
-
-
-
 				});
+
+
+
+
+
 
 
 				
