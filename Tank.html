@@ -5,6 +5,9 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
+			html{
+				overflow: hidden;
+			}
 			body {
 				margin: 0px;
 				background-color: #000000;
@@ -238,11 +241,77 @@
 				gui.add(params, 'FollowMe');
 				gui.open();
 
-				window.onkeypress = function( event ) {
-					var key = String.fromCharCode(event.keyCode);
-			        var q = new THREE.Quaternion();
-			        switch( key ) {
-					  case 'w': case 'W':
+
+
+				window.addEventListener('keydown', function (e) {
+					// if (e.keyCode == 38 || e.keyCode == 37) back();
+					//top
+					if(e.keyCode==38)
+					{
+						
+						var x=2 * Math.sin(heading * Math.PI / 180);
+					  	var z=2 * Math.cos(heading * Math.PI / 180);
+						velocity += params.addSpeed;
+						params.Velocity = velocity;
+						if(Tank.position.x+x<450 && Tank.position.x+x>-450)
+							Tank.position.x += x;
+						if(Tank.position.z+z<450 && Tank.position.z+z>-450)	
+							Tank.position.z += z;
+						TankWheelRightFront.rotation.x+=0.3;
+						TankWheelLeftFront.rotation.x+=0.3;
+						TankWheelRightBack.rotation.x+=0.3;
+						TankWheelLeftBack.rotation.x+=0.3;
+						// camera.lookAt(Tank.position);
+					// camera.position.x = camera.position.x;
+					// camera.position.y = camera.position.;
+					// camera.position.z = camera.position.z;
+
+					}
+					//left
+					if(e.keyCode==37)
+					{
+						heading	+= params.rotSpeed;
+						heading = heading % 360;
+						barrelHeading+=params.rotSpeed;
+						barrelHeading=barrelHeading%360;
+						Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), params.rotSpeed * Math.PI / 180);
+						TankWheelRightFront.rotation.x+=0.3;
+						TankWheelRightBack.rotation.x+=0.3;						
+						TankWheelLeftFront.rotation.x-=0.3;                      
+						TankWheelLeftBack.rotation.x-=0.3;  
+					}
+					//right
+					if(e.keyCode==39)
+					{
+						heading	-= params.rotSpeed;
+						heading = heading % 360;			     
+						barrelHeading-=params.rotSpeed;
+						barrelHeading=barrelHeading%360;
+						Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);
+						TankWheelRightFront.rotation.x-=0.3;
+						TankWheelRightBack.rotation.x-=0.3;
+						TankWheelLeftFront.rotation.x+=0.3;
+						TankWheelLeftBack.rotation.x+=0.3;
+					}
+					//down
+					if(e.keyCode==40)
+					{
+						var x=2 * Math.sin(heading * Math.PI / 180);
+  					  	var z=2 * Math.cos(heading * Math.PI / 180);
+						if(Tank.position.x-x<450 && Tank.position.x-x>-450)
+							Tank.position.x -=x;
+						if(Tank.position.z-z<450 && Tank.position.z-z >-450)
+							Tank.position.z -= z;
+						velocity -= params.addSpeed;
+						params.Velocity = velocity;
+						TankWheelRightFront.rotation.x-=0.3;
+						TankWheelLeftFront.rotation.x-=0.3;
+						TankWheelRightBack.rotation.x-=0.3;
+						TankWheelLeftBack.rotation.x-=0.3;
+
+					}
+					if(e.keyCode==87)
+					{
 						if(elevationAngle+params.rotBarrelSpeed<32)
 						{
 					  		elevationAngle+=params.rotBarrelSpeed;
@@ -251,102 +320,56 @@
 						}
 						// TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), -params.rotBarrelSpeed * Math.PI / 180);       	
 						console.log(elevationAngle);
-						break;
-					  case 's': case 'S':
-					  if(elevationAngle-params.rotBarrelSpeed>-4)
+						// break;
+					}
+					if(e.keyCode==83)
+					{
+						if(elevationAngle-params.rotBarrelSpeed>-4)
 						{
 					  	elevationAngle-=params.rotBarrelSpeed;
 						elevationAngle = elevationAngle % 360;
 						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 1, 0, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       	
 						}
 						console.log(elevationAngle);
-                        break;
-                     case 'd': case 'D':
-	                      barrelHeading	-= params.rotBarrelSpeed;
-						  barrelHeading = barrelHeading % 360;
-					//   TankBarrel.rotateAroundWorldAxis(Tank.position,new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180)			     
-	
-						  TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180);  
-	     
-                        break;
-                    case 'a': case 'A':
-			  
+					}
+					if(e.keyCode==65)
+					{
 						barrelHeading	+= params.rotBarrelSpeed;
 						barrelHeading = barrelHeading % 360;
-						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180);       
-							//  TankBarrel.rotateAroundWorldAxis(Tank.position,new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180)			     
-						  break;
-			          case ' ':
-                            geometry=new THREE.SphereGeometry(5,32,32);
-                            material=new THREE.MeshPhongMaterial({color:"#ffffff"});
-                            Shell=new THREE.Mesh(geometry,material);
-                            
-                            Shell.position.x=TankBarrelHead.getWorldPosition().x;
-                            Shell.position.y=TankBarrelHead.getWorldPosition().y;
-                            Shell.position.z=TankBarrelHead.getWorldPosition().z;
-                      
-                            scene.add(Shell);
-                            shellVelocity=20;
-							Fire=true;
-							shellForwardVelocity= shellVelocity * Math.cos(elevationAngle * Math.PI / 180);
-							shellUpwardVelocity  =shellVelocity * Math.sin(elevationAngle * Math.PI / 180);
-							velocityH=shellUpwardVelocity;
-                        // velocityH = 50;
-                            break;
-                      case "8":
-					  var x=2 * Math.sin(heading * Math.PI / 180);
-					  var z=2 * Math.cos(heading * Math.PI / 180);
-						  velocity += params.addSpeed;
-							params.Velocity = velocity;
-							if(Tank.position.x+x<450 && Tank.position.x+x>-450)
-								Tank.position.x += x;
-							if(Tank.position.z+z<450 && Tank.position.z+z>-450)	
-								Tank.position.z += z;
-                            TankWheelRightFront.rotation.x+=0.3;
-							TankWheelLeftFront.rotation.x+=0.3;
-							TankWheelRightBack.rotation.x+=0.3;
-							TankWheelLeftBack.rotation.x+=0.3;
+						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), +params.rotBarrelSpeed * Math.PI / 180);     
+					}
+					if(e.keyCode==68)
+					{
+						barrelHeading	-= params.rotBarrelSpeed;
+						barrelHeading = barrelHeading % 360;
+						TankBarrel.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotBarrelSpeed * Math.PI / 180);  
+					}
+					if(e.keyCode==32)
+					{
+						geometry=new THREE.SphereGeometry(5,32,32);
+						material=new THREE.MeshPhongMaterial({color:"#ffffff"});
+						Shell=new THREE.Mesh(geometry,material);
+						
+						Shell.position.x=TankBarrelHead.getWorldPosition().x;
+						Shell.position.y=TankBarrelHead.getWorldPosition().y;
+						Shell.position.z=TankBarrelHead.getWorldPosition().z;
+					
+						scene.add(Shell);
+						shellVelocity=20;
+						Fire=true;
+						shellForwardVelocity= shellVelocity * Math.cos(elevationAngle * Math.PI / 180);
+						shellUpwardVelocity  =shellVelocity * Math.sin(elevationAngle * Math.PI / 180);
+						velocityH=shellUpwardVelocity;
+					}
 
-                      break;      
-					  case "5":
-					  var x=2 * Math.sin(heading * Math.PI / 180);
-					  var z=2 * Math.cos(heading * Math.PI / 180);
-						  if(Tank.position.x-x<450 && Tank.position.x-x>-450)
-								Tank.position.x -=x;
-							if(Tank.position.z-z<450 && Tank.position.z-z >-450)
-								Tank.position.z -= z;
-                            velocity -= params.addSpeed;
-                            params.Velocity = velocity;
-                            TankWheelRightFront.rotation.x-=0.3;
-							TankWheelLeftFront.rotation.x-=0.3;
-							TankWheelRightBack.rotation.x-=0.3;
-							TankWheelLeftBack.rotation.x-=0.3;
 
-                      break;
-                      case "6":
-							heading	-= params.rotSpeed;
-			          		heading = heading % 360;			     
-							barrelHeading-=params.rotSpeed;
-							barrelHeading=barrelHeading%360;
-							Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);
-                            TankWheelRightFront.rotation.x-=0.3;
-							TankWheelRightBack.rotation.x-=0.3;
-							TankWheelLeftFront.rotation.x+=0.3;
-                            TankWheelLeftBack.rotation.x+=0.3;
-                      break;
-                      case "4":
-                            heading	+= params.rotSpeed;
-							heading = heading % 360;
-							barrelHeading+=params.rotSpeed;
-							barrelHeading=barrelHeading%360;
-							Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), params.rotSpeed * Math.PI / 180);
-							TankWheelRightFront.rotation.x+=0.3;
-							TankWheelRightBack.rotation.x+=0.3;						
-							TankWheelLeftFront.rotation.x-=0.3;                      
-							TankWheelLeftBack.rotation.x-=0.3;                      							
-                      break;  
-			        }
-			    };
+
+
+
+				});
+
+
+				
 			}
 
 			function onWindowResize() {
@@ -379,8 +402,7 @@
 					Tank.position.x = 449;
 					TankBarrel.position.x=449;
 				}
-				// else
-				// 	BBhead.position.x = Tank.position.x;
+
 
 				if(Tank.position.z > 450 || Tank.position.z < -450)
 				{
@@ -389,11 +411,7 @@
 						Tank.position.z = 449;
 						TankBarrel.position.z=449;
 				}
-				// else
-				// 	BBhead.position.z = Tank.position.z;
 
-
-				// BBhead.position.y = Tank.position.y + 50;
 
 				// Camera now following the BB8
 				if(params.FollowMe){
@@ -401,7 +419,8 @@
 					camera.position.y = 500;
 					camera.position.z = 400+Tank.position.z;
 					camera.lookAt(Tank.position);
-                }
+				}
+
                 if(Fire==true)
                 {
 
@@ -411,7 +430,7 @@
 
 
 
-					console.log(elevationAngle);
+
                     // Shell.position.
                     velocityH += 10*gravity*deltaTime/1000.0;
 
