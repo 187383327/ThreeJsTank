@@ -28,7 +28,7 @@
 			var TankBody, BBhead;
 
 			var gravity = -9.8; // 向上為正
-			var velocity = 0;
+			var velocity = 10;
 			var velocityH = 0;
             var heading = 0;
 
@@ -41,7 +41,8 @@
 			var press_s=false;
 			var press_d=false;
 
-
+			var x=0;
+			var z=0;
 
 			var barrelHeading=0;
 			var elevationAngle=0;
@@ -60,7 +61,7 @@
 
             var Tank;
             var Shell;
-			var shellVelocity=0;
+			var shellVelocity=20;
 			var shellUpwardVelocity=0;
 			var shellForwardVelocity=0;
 					
@@ -70,17 +71,13 @@
 			var gui, params;
 			var guiMe = function() {
 			  this.Heading = heading;
-			  this.Velocity = velocity;
+				
 			  this.BarrelHeading=barrelHeading;
 			  this.ElevationAngle=elevationAngle;
 
-			  this.addSpeed = 10;
+			  this.Velocity = velocity;
 			  this.rotSpeed = 2;
 			  this.rotBarrelSpeed=2;
-			  this.Stop = function() {
-			   	velocity = 0;
-			  	this.Velocity = velocity;
-			  };
 			  this.FollowMe = false;
 			};
 
@@ -162,16 +159,21 @@
 				TankWheelRightBack.scale.set(1,0.7,1);                
 
 
-                geometry=new THREE.BoxGeometry(15,15,30,1,1,1);
+                // geometry=new THREE.BoxGeometry(15,15,30,1,1,1);
+				geometry=new THREE.CylinderGeometry(6,6,30,32);
                 material=new THREE.MeshPhongMaterial({color:"#99cc00"});
                 TankBarrelBody=new THREE.Mesh(geometry,material);
+				TankBarrelBody.rotation.x=90*Math.PI/180;
 				TankBarrelBody.position.set(0,0,31);
 
 				
-				geometry=new THREE.BoxGeometry(8,8,5,1,1,1);
+				// geometry=new THREE.BoxGeometry(8,8,5,1,1,1);
+				geometry=new THREE.CylinderGeometry(3,3,1,32);
+				
                 material=new THREE.MeshPhongMaterial({color:"#333300"});
 				TankBarrelHead=new THREE.Mesh(geometry,material);
-				TankBarrelHead.position.set(0,0,45);
+				TankBarrelHead.rotation.x=90*Math.PI/180;
+				TankBarrelHead.position.set(0,0,47);
 
 				
 				geometry=new THREE.SphereGeometry(20,16,16);
@@ -226,13 +228,11 @@
 				gui = new dat.GUI();
 
 				gui.add(params, 'Heading').listen();
-				gui.add(params, 'Velocity').listen();
 				gui.add(params,"BarrelHeading").listen();
 				gui.add(params,"ElevationAngle").listen();
-				gui.add(params, 'addSpeed', 0, 30);
+				gui.add(params, 'Velocity', 0, 30);
 				gui.add(params, 'rotSpeed', 0, 30);
 				gui.add(params, "rotBarrelSpeed",0,30);
-				gui.add(params, 'Stop');
 				gui.add(params, 'FollowMe');
 				gui.open();
 
@@ -243,7 +243,7 @@
 					//top
 					if(e.keyCode==38)
 					{
-						press_top=true;						
+						press_top=true;				
 					}
 					//left
 					if(e.keyCode==37)
@@ -259,6 +259,7 @@
 					if(e.keyCode==40)
 					{
 						press_down=true;
+
 					}
 					//press w
 					if(e.keyCode==87)
@@ -279,18 +280,15 @@
 					}
 					if(e.keyCode==32)
 					{
-						geometry=new THREE.SphereGeometry(7,32,32);
+						geometry=new THREE.SphereGeometry(5,32,32);
 						material=new THREE.MeshPhongMaterial({color:"#CACFD2"});
 						Shell=new THREE.Mesh(geometry,material);
 						
 						Shell.position.x=TankBarrelHead.getWorldPosition().x;
 						Shell.position.y=TankBarrelHead.getWorldPosition().y;
 						Shell.position.z=TankBarrelHead.getWorldPosition().z;
-						// Shell.position.x=TankBarrelHead.position.x;
-						// Shell.position.y=TankBarrelHead.position.y;
-						// Shell.position.z=TankBarrelHead.position.z;
+
 						scene.add(Shell);
-						shellVelocity=20;
 						Fire=true;
 						shellForwardVelocity= shellVelocity * Math.cos(elevationAngle * Math.PI / 180);
 						shellUpwardVelocity  =shellVelocity * Math.sin(elevationAngle * Math.PI / 180);
@@ -364,22 +362,27 @@
 			function animate() {
 				requestAnimationFrame( animate );
 
-
+				// Rotate the wheel
+				var deltaTime = Date.now() - lastTime;
+				lastTime = Date.now();
+				var tickV = (velocity*deltaTime/1000.0);
+				var WheelForwardSpeed=params.Velocity/100;
+				var WheelRotateSpeed=params.rotSpeed/40;
+				// console.log(WheelForwardSpeed);
+				// console.log(WheelRotateSpeed);
 				if(press_top==true)
 				{
-
-					var x=2 * Math.sin(heading * Math.PI / 180);
-					var z=2 * Math.cos(heading * Math.PI / 180);
-					velocity += params.addSpeed;
-					params.Velocity = velocity;
+					
+					 x=params.Velocity/5 * Math.sin(heading * Math.PI / 180);
+					 z=params.Velocity/5 * Math.cos(heading * Math.PI / 180);
 					if(Tank.position.x+x<450 && Tank.position.x+x>-450)
 						Tank.position.x += x;
 					if(Tank.position.z+z<450 && Tank.position.z+z>-450)	
 						Tank.position.z += z;
-					TankWheelRightFront.rotation.x+=0.3;
-					TankWheelLeftFront.rotation.x+=0.3;
-					TankWheelRightBack.rotation.x+=0.3;
-					TankWheelLeftBack.rotation.x+=0.3;
+					TankWheelRightFront.rotation.x+=WheelForwardSpeed;
+					TankWheelLeftFront.rotation.x+=WheelForwardSpeed;
+					TankWheelRightBack.rotation.x+=WheelForwardSpeed;
+					TankWheelLeftBack.rotation.x+=WheelForwardSpeed;
 
 				}
 				if(press_left==true)
@@ -389,10 +392,10 @@
 					barrelHeading+=params.rotSpeed;
 					barrelHeading=barrelHeading%360;
 					Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), params.rotSpeed * Math.PI / 180);
-					TankWheelRightFront.rotation.x+=0.3;
-					TankWheelRightBack.rotation.x+=0.3;						
-					TankWheelLeftFront.rotation.x-=0.3;                      
-					TankWheelLeftBack.rotation.x-=0.3;  
+					TankWheelRightFront.rotation.x+=WheelRotateSpeed;
+					TankWheelRightBack.rotation.x+=WheelRotateSpeed;						
+					TankWheelLeftFront.rotation.x-=WheelRotateSpeed;                      
+					TankWheelLeftBack.rotation.x-=WheelRotateSpeed;  
 				}
 				if(press_right==true)
 				{
@@ -401,26 +404,26 @@
 					barrelHeading-=params.rotSpeed;
 					barrelHeading=barrelHeading%360;
 					Tank.rotateOnWorldAxis ( new THREE.Vector3( 0, 1, 0 ), -params.rotSpeed * Math.PI / 180);
-					TankWheelRightFront.rotation.x-=0.3;
-					TankWheelRightBack.rotation.x-=0.3;
-					TankWheelLeftFront.rotation.x+=0.3;
-					TankWheelLeftBack.rotation.x+=0.3;
+					TankWheelRightFront.rotation.x-=WheelRotateSpeed;
+					TankWheelRightBack.rotation.x-=WheelRotateSpeed;
+					TankWheelLeftFront.rotation.x+=WheelRotateSpeed;
+					TankWheelLeftBack.rotation.x+=WheelRotateSpeed;
 
 				}
 				if(press_down==true)
 				{
-					var x=2 * Math.sin(heading * Math.PI / 180);
-					var z=2 * Math.cos(heading * Math.PI / 180);
+
+					 x=params.Velocity/10 * Math.sin(heading * Math.PI / 180);
+					 z=params.Velocity/10 * Math.cos(heading * Math.PI / 180);
 					if(Tank.position.x-x<450 && Tank.position.x-x>-450)
 						Tank.position.x -=x;
 					if(Tank.position.z-z<450 && Tank.position.z-z >-450)
 						Tank.position.z -= z;
-					velocity -= params.addSpeed;
-					params.Velocity = velocity;
-					TankWheelRightFront.rotation.x-=0.3;
-					TankWheelLeftFront.rotation.x-=0.3;
-					TankWheelRightBack.rotation.x-=0.3;
-					TankWheelLeftBack.rotation.x-=0.3;
+
+					TankWheelRightFront.rotation.x-=WheelForwardSpeed;
+					TankWheelLeftFront.rotation.x-=WheelForwardSpeed;
+					TankWheelRightBack.rotation.x-=WheelForwardSpeed;
+					TankWheelLeftBack.rotation.x-=WheelForwardSpeed;
 
 				}
 				if(press_w==true)
@@ -453,10 +456,7 @@
 
 				}
 
-				// Rotate the wheel
-				var deltaTime = Date.now() - lastTime;
-				lastTime = Date.now();
-				var tickV = (velocity*deltaTime/1000.0);
+
 				// Tank.rotateOnAxis ( new THREE.Vector3( 0, 0, 1 ), tickV * Math.PI / 180);
 				
 				// Move the body & head
@@ -510,7 +510,7 @@
 
 
 
-				params.Velocity = velocity;
+				// params.Velocity = velocity;
 				params.Heading = heading;
 				params.BarrelHeading=barrelHeading;
 				params.ElevationAngle=elevationAngle;
